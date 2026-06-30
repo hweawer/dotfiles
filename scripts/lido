@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PROJECT_DIR="${1:-$HOME/work/lido}"
+SESSION="lido"
+
+if ! command -v tmux >/dev/null 2>&1; then
+  echo "tmux is not installed"
+  exit 1
+fi
+
+if [ ! -d "$PROJECT_DIR" ]; then
+  echo "Project dir does not exist: $PROJECT_DIR"
+  echo "Usage: lido /path/to/project"
+  exit 1
+fi
+
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+  tmux attach-session -t "$SESSION"
+  exit 0
+fi
+
+tmux new-session -d -s "$SESSION" -c "$PROJECT_DIR" -n "claude-main"
+tmux send-keys -t "$SESSION:claude-main" "claude" C-m
+
+tmux new-window -t "$SESSION" -c "$PROJECT_DIR" -n "claude-research"
+tmux send-keys -t "$SESSION:claude-research" "claude" C-m
+
+tmux new-window -t "$SESSION" -c "$PROJECT_DIR" -n "claude-review"
+tmux send-keys -t "$SESSION:claude-review" "claude" C-m
+
+tmux new-window -t "$SESSION" -c "$PROJECT_DIR" -n "git"
+tmux send-keys -t "$SESSION:git" "lazygit" C-m
+
+tmux new-window -t "$SESSION" -c "$PROJECT_DIR" -n "scratch"
+
+tmux select-window -t "$SESSION:claude-main"
+tmux attach-session -t "$SESSION"

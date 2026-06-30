@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CONFIG="$HOME/.config/work/projects.conf"
+PROJECT="${1:-}"
+
+if [ ! -f "$CONFIG" ]; then
+  echo "Missing config: $CONFIG"
+  exit 1
+fi
+
+if [ -z "$PROJECT" ]; then
+  echo "Usage: work <project>"
+  echo
+  echo "Available projects:"
+  grep -vE '^\s*#|^\s*$' "$CONFIG" | cut -d ':' -f 1 | sort
+  exit 1
+fi
+
+LINE="$(grep -E "^${PROJECT}:" "$CONFIG" || true)"
+
+if [ -z "$LINE" ]; then
+  echo "Unknown project: $PROJECT"
+  echo
+  echo "Available projects:"
+  grep -vE '^\s*#|^\s*$' "$CONFIG" | cut -d ':' -f 1 | sort
+  exit 1
+fi
+
+PROJECT_DIR="$(echo "$LINE" | cut -d ':' -f 2)"
+IDE="$(echo "$LINE" | cut -d ':' -f 3)"
+
+PROJECT_DIR="${PROJECT_DIR/#\$HOME/$HOME}"
+SESSION="work-$PROJECT"
+
+if [ ! -d "$PROJECT_DIR" ]; then
+  echo "Project dir does not exist: $PROJECT_DIR"
+  exit 1
+fi
+
+open_ide() {
+  case "$IDE" in
+    vscode)
+      if command -v code >/dev/null 2>&1; then
+        code "$PROJECT_DIR"
+      fi
+      ;;
+    intellij)
+      if command -v idea >/dev/null 2>&1; then
+        idea "$PROJECT_DIR"
+      fi
+      ;;
+    none)
+      ;;
+    *)
+      echo "Unknown IDE: $IDE"
+      ;;
+  esac
+}
+
+attach_or_switch() {
+  if [ -n "${TMUX:-}" ]; then
+    tmux switch-client -t "$SESSION"
+  else
+    tmux attach-session -t "$SESSION"
+  fi
+}
+
+open_ide
+
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+  attach_or_switch
+  exit 0
+fi
+
+tmux new-session -d -s "$SESSION" -c "$PROJECT_DIR" -n "main"
+
+# Window 1: Claude + shell
+tmux send-keys -t "$SESSION:main.1" "claude" C-m
+tmux split-window -h -t "$SESSION:main" -c "$PROJECT_DIR"
+tmux send-keys -t "$SESSION:main.2" "pwd && git status --short" C-m
+tmux select-pane -t "$SESSION:main.1"
+
+# Window 2: lazygit
+tmux new-window -t "$SESSION" -c "$PROJECT_DIR" -n "git"
+tmux send-keys -t "$SESSION:git" "lazygit" C-m
+
+# Window 3: research Claude
+tmux new-window -t "$SESSION" -c "$PROJECT_DIR" -n "research"
+tmux send-keys -t "$SESSION:research" "claude" C-m
+
+# Window 4: scratch shell
+tmux new-window -t "$SESSION" -c "$PROJECT_DIR" -n "scratch"
+
+tmux select-window -t "$SESSION:main"
+attach_or_switch

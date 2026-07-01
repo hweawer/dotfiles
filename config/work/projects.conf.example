@@ -1,0 +1,5 @@
+# Format: <project>:<dir>:<ide>
+# ide is one of: vscode, intellij
+#
+# example:
+# myproject:$HOME/code/myproject:vscode

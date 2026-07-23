@@ -1,0 +1,38 @@
+{
+  "model": "haiku",
+  "includeCoAuthoredBy": false,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook claude"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "pyright-lsp@claude-plugins-official": true,
+    "ethskills@ethskills": true,
+    "linear-cli@linear-cli": true
+  },
+  "extraKnownMarketplaces": {
+    "ethskills": {
+      "source": {
+        "source": "github",
+        "repo": "austintgriffith/ethskills"
+      }
+    },
+    "linear-cli": {
+      "source": {
+        "source": "github",
+        "repo": "schpet/linear-cli"
+      }
+    }
+  },
+  "tui": "fullscreen",
+  "skipWorkflowUsageWarning": true
+}

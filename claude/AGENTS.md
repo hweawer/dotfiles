@@ -67,5 +67,3 @@ Language- and platform-specific rules live in `~/.claude/library/`, kept OUT of
 `~/.claude/rules/` (which auto-loads on every session). They load only when a repo
 imports them, e.g.: `@~/.claude/library/go.md`, `@~/.claude/library/python.md`,
 `@~/.claude/library/kubernetes.md`, `@~/.claude/library/distributed-systems.md`.
-
-@RTK.md

@@ -20,7 +20,6 @@ ln -sf "$PWD/starship/starship.toml" ~/.config/starship.toml
 mkdir -p ~/.claude
 ln -sf  "$PWD/claude/AGENTS.md"      ~/AGENTS.md
 ln -sf  ~/AGENTS.md                  ~/.claude/CLAUDE.md
-ln -sf  "$PWD/claude/RTK.md"         ~/.claude/RTK.md
 ln -sf  "$PWD/claude/settings.json"  ~/.claude/settings.json
 rm -rf  ~/.claude/rules ~/.claude/library
 ln -sfn "$PWD/claude/rules"          ~/.claude/rules
